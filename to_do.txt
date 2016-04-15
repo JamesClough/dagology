@@ -1,0 +1,12 @@
+JC - this is a to do list for dagology
+
+Scattering - Minkowski map
+             de Sitter
+             hyperbolic sheet (and more dimensions)
+Pivot MDS
+Generate MMD data
+TR and TC
+sparse matrix support
+topological sorting - https://en.wikipedia.org/wiki/Topological_sorting
+
+unit tests

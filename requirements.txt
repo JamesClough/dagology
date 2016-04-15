@@ -1,0 +1,4 @@
+Python 2.6 or later
+numpy
+scipy
+matplotlib
