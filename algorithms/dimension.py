@@ -4,27 +4,41 @@ myrheim_meyer(A, k) - Myrheim-Meyer dimension for k chains
 
 midpoint_scaling(A, i, j) - Midpoint-scaling dimension in I[i,j] interval
 """
+import pickle
+import numpy as np
+from sets import Set
 
 def get_mmd_data(k, filepath=None):
-    if filepath == None:
-        filepath = '../cache/MMD_data/f_of_d_%s.txt' % k
     try:
-        f_dict = {}
-        with open(filepath) as f:
-            for line in f.readlines():
-                d, f_d = line.split()
-                f_dict[float(f_d)] = float(d)
+        with open(filepath, 'rb') as f:
+            f_dict = pickle.load(f)
     except:
-        print """myrheim_meyer Couldn't find MMD data for k=%s, in file %s so 
-               creating new data now"""
+        print """myrheim_meyer couldn't find MMD data for k=%s, in file %s so 
+               creating new data now""" % (k, filepath)
         f_dict = create_mmd_data(k, filepath)
-        
+    return f_dict
+
+def myrheim_meyer_ordering_fraction(D, k):
+    """ Calculate analytical ordering fraction <S_k> / N^k from Myrheim-Meyer"""
+    from math import gamma
+    top = gamma(D/2.) * gamma(D) * (gamma(D+1.)**(k-1.))
+    bottom = (2**(k-1.)) * k * gamma(k*D/2.) * gamma((k+1.) * (D/2.))
+    return top / bottom
+               
 def create_mmd_data(k, filepath):
-    pass
+    """ Create dictionary of inverse Myrheim-Meyer f(D) and dump to filepath"""
+    f_dict = {}
+    for D in np.arange(0.001, 10., 0.001):
+        of = myrheim_meyer_ordering_fraction(D, k)
+        f_dict[of] = D
+    if filepath:
+        with open(filepath, 'wb') as f:
+            pickle.dump(f_dict, f)
+    return f_dict
 
 def ordering_fraction(A, k):
     """ Calculate the k-path ordering fraction"""
-    A_k = A.copy(deep=True)
+    A_k = A[:,:]
     for i in range(k-2):
         A_k = np.dot(A_k, A)
     N, _ = A.shape
@@ -36,8 +50,6 @@ def myrheim_meyer(A, k=2, cached_f_dict=None, filepath=None):
     
     IMPORTANT - this function assumes the adjacency matrix is transitively
                 complete!"""
-    
-    # try to load MMD data - JC: will want to make this find the file later
     if cached_f_dict == None:
         f_dict = get_mmd_data(k, filepath)
     else:
@@ -115,11 +127,11 @@ def get_midpoint(A, i, j):
     
 def midpoint_scaling(A, i=1, j=0):
     """ Calculate Midpoint-scaling dimension"""
-    k = get_midpoint(A)
+    k = get_midpoint(A, i, j)
     N, _ = A.shape
     A1, A2 = interval(A, i, k), interval(A, k, j)
-    N1, N2 = np.sum(N1[i, :]), np.sum(N2[:, j])
-    N_mean = np.mean(N1, N2)
-    D = (np.log(N_mean) - np.log(N)) / np.log(2)
+    N1, N2 = np.sum(A1[i, :]), np.sum(A2[:, j])
+    N_mean = np.mean([N1, N2])
+    D = (np.log(N) - np.log(N_mean)) / np.log(2)
     return D
     

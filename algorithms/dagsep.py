@@ -1,6 +1,27 @@
 """ Compute separations on a DAG"""
 import numpy as np
 
+def transitive_completion(A_):
+    """ Transitively complete adjacency matrix A"""
+    A = A_[:,:]
+    N, _ = A.shape
+    A_diff = True
+    i = 0
+    while A_diff:
+        A_old = A[:,:]
+        A = np.dot(A, A)
+        A += A_old
+        A[A>1.] = 1.
+        if np.array_equal(A_old, A):
+            A_diff = False
+        assert i < N, 'ERROR - Transitive Completion required more than N steps'
+        i += 1
+    return A
+    
+def transitive_reduction(A):
+    """ Transitively reduce adjacency matrix A"""
+    assert False, 'ERROR - transitive reduction not implemented yet'
+
 def longest_path_matrix(A, dmax=None):
     """ Calculate all longest paths and return them in a matrix
     

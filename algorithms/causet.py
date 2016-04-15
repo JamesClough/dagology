@@ -17,12 +17,12 @@ def causet_adj_matrix(S, R):
                     A[i,j] = 1.
     return A  
 
-def interval_causet(N, D):
+def interval_causet(N, D, fix_ends=True):
     """ Return N point, D dimensional Minkowski scattered causet adj-matrix"""
     import scatter
     import dagsep
-    R = scatter.minkowski_interval(N, D)
-    S = metrics.sq_distances(R, metrics.minkowski)
+    R = scatter.minkowski_interval(N, D, fix_ends)
+    S = metrics.sq_separations(R, metrics.minkowski)
     A = causet_adj_matrix(S, R)
     return A            
 
