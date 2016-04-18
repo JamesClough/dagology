@@ -4,13 +4,14 @@ import numpy as np
 def transitive_completion(A_):
     """ Transitively complete adjacency matrix A"""
     A = A_[:,:]
+    A_0 = A[:,:]
     N, _ = A.shape
     A_diff = True
     i = 0
     while A_diff:
         A_old = A[:,:]
-        A = np.dot(A, A)
-        A += A_old
+        A = np.dot(A, A_0)
+        A += A_0
         A[A>1.] = 1.
         if np.array_equal(A_old, A):
             A_diff = False
@@ -18,9 +19,31 @@ def transitive_completion(A_):
         i += 1
     return A
     
-def transitive_reduction(A):
-    """ Transitively reduce adjacency matrix A"""
-    assert False, 'ERROR - transitive reduction not implemented yet'
+def transitive_reduction(A_, LP=None):
+    """ Transitively reduce adjacency matrix A
+   
+    plan is to look at successive powers of A and if an element is 1 in both
+    then it represents an edge which is transitively implied
+    we need to do this |LP| times - 
+       - could do it N times to be sure (start here)
+       - could compute |LP| but that might be slower
+       - could allow |LP| as optional input incase it is already calculated
+   """
+    A = A_[:,:]
+    A_0 = A[:,:]
+    N, _ = A.shape
+    if LP:
+        max_path = LP
+    else:
+        max_path = N
+    i = 0
+    while i < max_path:
+        A = np.dot(A, A_0)
+        A = A_0 - A
+        A[A<1] = 0
+        A[A>1] = 1
+        i += 1
+    return A
 
 def longest_path_matrix(A, dmax=None):
     """ Calculate all longest paths and return them in a matrix
@@ -42,7 +65,7 @@ def longest_path_matrix(A, dmax=None):
     N = A.shape[0]
     LP = np.zeros((N, N))
     i = 1
-    B = A.copy()
+    B = A[:,:]
     while np.sum(B) > 0.:
         path_exist = np.sign(B)
         path_length = i * path_exist
