@@ -17,14 +17,23 @@ def causet_adj_matrix(S, R):
                     A[i,j] = 1.
     return A  
 
-def interval_causet(N, D, fix_ends=True):
+def minkowski_causet(N, D, fix_ends=True):
     """ Return N point, D dimensional Minkowski scattered causet adj-matrix"""
     import scatter
     import dagsep
     R = scatter.minkowski_interval(N, D, fix_ends)
     S = metrics.sq_separations(R, metrics.minkowski)
     A = causet_adj_matrix(S, R)
-    return A            
+    return A     
+    
+def de_sitter_causet(N, D, eta_0, eta_1):
+    """ Return N point, D dimensional de Sitter scattered causet adj-matrix"""
+    import scatter
+    import dagsep
+    R = scatter.de_sitter_interval(N, D, eta_0, eta_1)
+    S = metrics.sq_separations(R, metrics.de_sitter)
+    A = causet_adj_matrix(S, R)
+    return A       
 
 if __name__ == "__main__":
     print __doc__

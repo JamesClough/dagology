@@ -13,7 +13,7 @@ def J_matrix(N):
 def calc_double_centre(S):
     """ Return double-centered square distance matrix
     
-    S -- square distance matrix"""
+    S -- squared distance matrix"""
     N, _ = S.shape
     assert N == _ , 'Distance matrix must be square'
     J = J_matrix(N)
@@ -51,7 +51,11 @@ def m_eval(E, U, D):
     return E_max, U_max
 
 def MDS(ds2, D, method='euclidean'):
-    """ Classic MDS algorithm """
+    """ Classic MDS algorithm
+    
+    Allowed methods - 
+    -- euclidean - classic MDS
+    -- lorentzian - the largest negative eigenvalue is used, and the D-1 largest positive"""
     N, _ = ds2.shape
     assert N == _
     A = calc_double_centre(ds2)
@@ -76,6 +80,10 @@ def select_landmarks(ds2, k):
 def LMDS(ds2, D, k=None, method='euclidean'):
     """ Landmark MDS algorithm 
     
+    Instead of fitting every point to every other point, first fit k landmark
+    points to each other, and then fit the remaining N-k to those landmarks
+    If the landmarks are well distributed then this is a good approximation
+    of MDS on all N points.
     JC - should be O(k*n) in speed """
     N, _ = ds2.shape
     assert N == _

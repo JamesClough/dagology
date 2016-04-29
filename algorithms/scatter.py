@@ -85,9 +85,9 @@ def de_sitter_interval(N, D, eta_0, eta_1, method='scatter'):
            not yet implemented
     """
     if method == 'scatter':
-        return de_sitter_interval_scatter(N, D, fix_ends=True)
+        return de_sitter_interval_scatter(N, D, eta_0, eta_1)
     elif method == 'map':
-        return de_sitter_interval_map(N, D, fix_ends=True)
+        return de_sitter_interval_map(N, D, eta_0, eta_1)
     else:
         assert False, 'Invalid method %s given to de_sitter_interval' % method    
     
@@ -108,6 +108,8 @@ def de_sitter_interval_scatter(N, D, eta_0, eta_1):
     JC - this is a sprinkling method so can be inefficient if many points are
          thrown away - this occurs when D is large, or when an eta_1 is close
          to pi/2
+         
+    for now, assume we want to fix the endpoints
     """
 
     u_0, u_1 = np.tan(eta_0), np.tan(eta_1)

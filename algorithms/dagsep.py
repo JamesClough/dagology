@@ -76,17 +76,20 @@ def longest_path_matrix(A, dmax=None):
             return LP
     return LP
     
-def naive_spacelike_matrix(LP, dmax=None):  
+def naive_spacelike_matrix(LP, dmax=None, k=None):  
     """ Calculate all naive spacelike distances and return them in a matrix
     
     Arguments:
     LP -- longest path matrix
     dmax -- maximum spacelike distance to be returned
+    k -- only determine distances to k 'landmark' points, and leave the rest
+        # this feature needs testing
     
     Result should be an NxN symmetric matrix of negative longest paths
     and positive naive spacelike separations
     
-    JC - this seems quite slow
+    JC - this seems quite slow when calculated for all N - I think it is the 
+         limiting factor on embedding large networks in spacetimes
     """
     if dmax == None:
         dmax = np.max(LP)
@@ -94,31 +97,33 @@ def naive_spacelike_matrix(LP, dmax=None):
     ds2 = ds * ds * -1
     N = LP.shape[0]
     for i in range(N):
-        for j in range(N):
-            if i > j:
-                # spacelike distance is symmetric so ds[i,j]==ds[j,i], and ds[i,i]==0
-                if ds2[i,j] == 0:
-                    # then they are spacelike separated and need a new value here
-                    i_past = np.flatnonzero(LP[:,i])
-                    j_past = np.flatnonzero(LP[:,j])
-                    w_list = np.intersect1d(i_past, j_past)
+        max_j = i
+        if k:
+            max_j = np.min([i, k])
+        for j in range(max_j):
+            # spacelike distance is symmetric so ds[i,j]==ds[j,i], and ds[i,i]==0
+            if ds2[i,j] == 0:
+                # then they are spacelike separated and need a new value here
+                i_past = np.flatnonzero(LP[:,i])
+                j_past = np.flatnonzero(LP[:,j])
+                w_list = np.intersect1d(i_past, j_past)
 
-                    i_future = np.flatnonzero(LP[i,:])
-                    j_future = np.flatnonzero(LP[j,:])
-                    z_list = np.intersect1d(i_future, j_future)
-                    if (len(z_list)>0) and (len(w_list)>0):
-                        # find min non-zero LP from w to z
-                        sp_dist = dmax
-                        for w in w_list:
-                            for z in z_list:
-                                w_z = LP[w, z]
-                                if w_z > 0:
-                                    sp_dist = min(sp_dist, w_z)
-                    else:
-                        sp_dist = dmax
-                        
-                    ds2[i,j] = sp_dist * sp_dist
-                    ds2[j,i] = sp_dist * sp_dist
+                i_future = np.flatnonzero(LP[i,:])
+                j_future = np.flatnonzero(LP[j,:])
+                z_list = np.intersect1d(i_future, j_future)
+                if (len(z_list)>0) and (len(w_list)>0):
+                    # find min non-zero LP from w to z
+                    sp_dist = dmax
+                    for w in w_list:
+                        for z in z_list:
+                            w_z = LP[w, z]
+                            if w_z > 0:
+                                sp_dist = min(sp_dist, w_z)
+                else:
+                    sp_dist = dmax
+                    
+                ds2[i,j] = sp_dist * sp_dist
+                ds2[j,i] = sp_dist * sp_dist
     return ds2 
     
 def twolink_spacelike_matrix(LP, dmax=None):
