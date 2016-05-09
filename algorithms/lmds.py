@@ -1,6 +1,5 @@
 """ Lorentzian Multidimensional scaling"""
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
 from numpy.linalg import eigh
 
 ################################################################################
@@ -72,9 +71,11 @@ def MDS(ds2, D, method='euclidean'):
 def select_landmarks(ds2, k):
     """ Choose k landmark points 
     
-    Select k landmark points and shuffle ds2 matrix so that these k points
+    Select k landmark points and reorder ds2 matrix so that these k points
     are the first k in the index"""
-    # do random for now
+    # Just use the first k coordinates for now 
+    # Later - implement maxmin - where new landmark maximises the minimum distance
+    #         to any existing landmark
     return ds2 
 
 def LMDS(ds2, D, k=None, method='euclidean'):
@@ -104,7 +105,8 @@ def LMDS(ds2, D, k=None, method='euclidean'):
     mean_rest = np.mean(ds2_rest, axis=0)
     L = U * 1./np.sqrt(np.diag(E))
     X = np.dot((mean_rest - ds2_rest), L) * 0.5
-    # temporary hack I'm sorry
+    # this dot product also needs to have the metric - for now we will just
+    # manually change a sign if necessary
     if method=='lorentzian':
         X[:, 0] *= -1
     return np.concatenate((X_L, X), axis=0)
@@ -150,7 +152,8 @@ def PMDS(ds2, D, k=None, method='euclidean'):
     mean_rest = np.mean(ds2_rest, axis=0)
     P = U * 1./np.sqrt(np.diag(E))
     X = np.dot((mean_rest - ds2_rest), P) * 0.5
-    # temporary hack I'm sorry
+    # this dot product also needs to have the metric - for now we will just
+    # manually change a sign if necessary
     if method=='lorentzian':
         X[:, 0] *= -1
     return np.concatenate((X_P, X), axis=0)

@@ -11,6 +11,8 @@ Riemannian
 def euclidean(x, y):
     """Calculcate Euclidean distance between x and y """
     assert len(x)==len(y), 'ERROR - vectors in Euclidean metric have different lengths'
+    if np.array_equal(x, y):
+        return 0.
     return np.sum((np.array(x) - np.array(y))*(np.array(x) - np.array(y)))
 
 def spherical(x_, y_):
@@ -19,6 +21,8 @@ def spherical(x_, y_):
     We are using standard angular coordinates where the x[d-1] is in (0, 2*pi)
     and the other angles are in (0, pi)"""
     assert len(x_)==len(y_), 'ERROR - vectors in spherical metric have different lengths'
+    if np.array_equal(x_, y_):
+        return 0.
     x, y = angular_to_cartesian(x_), angular_to_cartesian(y_)
     cos_psi = np.dot(x,y)
     psi = np.arccos(cos_psi)
@@ -45,6 +49,15 @@ def cartesian_to_angular(a):
         x[-1] = (2.*np.pi) - x[-1]
     return x
 
+def hyperbolic(x, y, a=1.):
+    """Calculate hyperbolic distances between coordinates in native representation """
+    if np.array_equal(x, y):
+        return 0.
+    d_theta = spherical(x[1:], y[1:])
+    cosh_ad = (np.cosh(a*x[0]) * np.cosh(a*y[0])) - (np.sinh(a*x[0]) * np.sinh(a*y[0]) * np.cos(d_theta))
+    d = np.arccosh(cosh_ad) / a
+    return d*d
+    
 """
 ################################################################################
 Lorentzian
@@ -53,6 +66,8 @@ Lorentzian
 def minkowski(x, y):
     """Calculate Minkowski separation between x and y using -++...+ convention"""
     assert len(x)==len(y), 'ERROR - vectors in Minkowski metric have different lengths'
+    if np.array_equal(x, y):
+        return 0.
     dt = x[0] - y[0]
     dt2 = dt * dt
     dx = np.array([x[i] - y[i] for i in range(1, len(x))])
@@ -66,6 +81,8 @@ def minkowski_periodic(x, y, L=[]):
        If len(L) < D-1 then assume no boundary on other spatial dimensions"""
     D = len(x)
     assert len(y) == D, 'ERROR - vectors in Minkowski metric have different lengths'
+    if np.array_equal(x, y):
+        return 0.
     # fill in remaining box dimensions with None
     # JC - we can probably make this more efficient later by vectorising the
     #      operation if the if L_d line
@@ -85,6 +102,9 @@ def minkowski_periodic(x, y, L=[]):
 
 def de_sitter(x, y):
     """ Calculate de Sitter separation between x and y in conformal coordinates"""
+    assert len(x)==len(y), 'ERROR - vectors in de Sitter metric have different lengths'
+    if np.array_equal(x, y):
+        return 0.
     dt = x[0] - y[0]
     dt2 = dt*dt
     dx = spherical(x[1:], y[1:])
@@ -103,7 +123,10 @@ def sq_separations(R, metric):
     S = np.zeros((R.shape[0], R.shape[0]))
     for i in range(R.shape[0]):
         for j in range(R.shape[0]):
-            S[i, j] = metric(R[i,:], R[j,:])
+            if i == j:
+                S[i, j] = 0.    
+            else:
+                S[i, j] = metric(R[i,:], R[j,:])
     return S
     
 if __name__ == "__main__":

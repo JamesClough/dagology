@@ -71,8 +71,21 @@ def minkowski_interval(N, D, fix_ends=True, method='scatter'):
         assert False, 'Invalid method %s given to minkowski_interval' % method
 
 ################################################################################
+# HYPERBOLIC
+def hyperbolic_disk(N, R, a=1.):
+    """ Scatter N points in a 2 dimensional hyperbolic manifold with curvature a
+    
+    The points are scattered uniformly with inside a disk of radius R 
+    We are using the native representation, where polar coordinate r
+    is the hyperbolic distance to the origin"""
+    X = np.random.rand(N, 2)
+    X[:,1] *= (2.* np.pi)
+    A_R = np.cosh(R * a) - 1.
+    X[:,0] = np.arccosh((X[:,0] * A_R) + 1.) / a
+    return X
+    
+################################################################################
 # DE SITTER
-# NOT IMPLEMENTED YET
 def de_sitter_interval(N, D, eta_0, eta_1, method='scatter'):
     """ Scatter N points in a D dimensional interval in de Sitter space
     
