@@ -63,6 +63,8 @@ def longest_path_matrix(A, dmax=None):
          Lorentzian spacetimes but this is not proven to my knowledge 
     """
     N = A.shape[0]
+    if dmax is None:
+        dmax = N
     LP = np.zeros((N, N))
     i = 1
     B = A[:,:]
@@ -72,7 +74,7 @@ def longest_path_matrix(A, dmax=None):
         LP = np.maximum.reduce((LP, path_length))
         B = np.dot(B, A)
         i += 1
-        if dmax and (i == dmax):
+        if i == dmax:
             return LP
     return LP
     

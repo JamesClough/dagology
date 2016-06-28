@@ -45,8 +45,8 @@ def m_eval(E, U, D):
     Returns:
     E_max -- Diagonal DxD array of sqrt of eigenvalues
     U_max -- NxD array of corresponding eigenvectors"""
-    E_max = np.diag(np.concatenate((E[0:1]*-1., E[-1*(D-1):])))
-    U_max = np.concatenate((U[:, 0:1], U[:, -1*(D-1):]), axis=1)
+    E_max = np.diag(np.concatenate((E[:1]*-1., E[:-1*D:-1])))
+    U_max = np.concatenate((U[:, :1], U[:, :-1*D:-1]), axis=1)
     return E_max, U_max
 
 def MDS(ds2, D, method='euclidean'):

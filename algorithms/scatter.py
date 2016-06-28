@@ -130,6 +130,10 @@ def de_sitter_interval_scatter(N, D, eta_0, eta_1):
     R = np.zeros((N, D))
     R[0,0] += eta_0 
     R[1,0] += eta_1
+    # set spatial coordinates of top and bottom of interval to pi
+    # avoiding annoying split over 0 and 2pi
+    R[0,-1] += np.pi
+    R[1,-1] += np.pi
     i = 2
     while i < N:
         u = (np.random.random() * d_u) + u_0

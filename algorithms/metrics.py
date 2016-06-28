@@ -9,7 +9,7 @@ Riemannian
 ################################################################################
 """
 def euclidean(x, y):
-    """Calculcate Euclidean distance between x and y """
+    """Calculate Euclidean distance between x and y """
     assert len(x)==len(y), 'ERROR - vectors in Euclidean metric have different lengths'
     if np.array_equal(x, y):
         return 0.
@@ -23,6 +23,9 @@ def spherical(x_, y_):
     assert len(x_)==len(y_), 'ERROR - vectors in spherical metric have different lengths'
     if np.array_equal(x_, y_):
         return 0.
+    if len(x_) == 1:
+        # special case can be calculated more quickly
+        return min(np.abs(x_[0] - y_[0]), (2.*np.pi - np.abs(x_[0] - y_[0])))
     x, y = angular_to_cartesian(x_), angular_to_cartesian(y_)
     cos_psi = np.dot(x,y)
     psi = np.arccos(cos_psi)
@@ -63,8 +66,10 @@ def hyperbolic(x, y, a=1.):
 Lorentzian
 ################################################################################
 """
-def minkowski(x, y):
-    """Calculate Minkowski separation between x and y using -++...+ convention"""
+def minkowski(x, y, c=1.):
+    """Calculate Minkowski separation between x and y using -++...+ convention
+    
+    c - speed of light - default to 1."""
     assert len(x)==len(y), 'ERROR - vectors in Minkowski metric have different lengths'
     if np.array_equal(x, y):
         return 0.
@@ -72,7 +77,7 @@ def minkowski(x, y):
     dt2 = dt * dt
     dx = np.array([x[i] - y[i] for i in range(1, len(x))])
     dx2 = dx * dx
-    dx2sum = sum(dx2)
+    dx2sum = sum(dx2) * c * c
     return dx2sum - dt2 
       
 def minkowski_periodic(x, y, L=[]):
@@ -122,11 +127,13 @@ def sq_separations(R, metric):
         c - speed of light"""
     S = np.zeros((R.shape[0], R.shape[0]))
     for i in range(R.shape[0]):
-        for j in range(R.shape[0]):
+        for j in range(i):
             if i == j:
                 S[i, j] = 0.    
             else:
-                S[i, j] = metric(R[i,:], R[j,:])
+                d = metric(R[i,:], R[j,:])
+                S[i, j] = d
+                S[j, i] = d
     return S
     
 if __name__ == "__main__":
