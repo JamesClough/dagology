@@ -1,7 +1,24 @@
 import dagology as dag
 import example_utils as util
 import pickle 
-import networkx as nx
+
+def load_causal_set(N, D, i):
+    path = '../data/causal_sets/N%s_D%s_%s' % (N, D, i)
+    with open(path + '_R.pkl', 'rb') as f:
+        R = pickle.load(f)
+    with open(path + '_A.pkl', 'rb') as f:
+        A = pickle.load(f)   
+    with open(path + '_X.pkl', 'rb') as f:
+        X = pickle.load(f) 
+    return A, R, X
+    
+def load_random_dag(N, k, i):
+    path = '../data/random_dag/N%s_k%s_%s' % (N, k, i)
+    with open(path + '_R.pkl', 'rb') as f:
+        R = pickle.load(f)
+    with open(path + '_A.pkl', 'rb') as f:
+        A = pickle.load(f)   
+    return A, R  
 
 def random_dag_data(N, k, D_hat, r, base_filepath):
     for i in range(r):
