@@ -7,8 +7,8 @@ from dagology.algorithms.dagsep import *
 import dagology.algorithms.dimension
 from dagology.algorithms.dimension import *
 
-import dagology.algorithms.lmds
-from dagology.algorithms.lmds import *
+import dagology.algorithms.mds
+from dagology.algorithms.mds import *
 
 import dagology.algorithms.metrics
 from dagology.algorithms.metrics import *
