@@ -28,8 +28,11 @@ if sys.version_info[:2] < (2, 6):
     raise ImportError(m % sys.version_info[:2])
 del sys
 
+import pickle
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from dagology import *
+import dagology.algorithms
+from dagology.algorithms import *
+

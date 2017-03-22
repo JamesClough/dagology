@@ -1,6 +1,29 @@
-""" Compute separations on a DAG"""
+""" Utility functions for DAG analysis using adjacency matrices"""
+
+#    Copyright (C) 2016 by
+#    James Clough <james.clough91@gmail.com>
+#    All rights reserved.
+#    BSD license.
+
+__author__ = "\n".join(["James Clough (james.clough91@gmail.com)"])
+
 import numpy as np
 
+def causet_adj_matrix(S, R):
+    """ Return causal set adjacency matrix A
+    
+        S: separations
+        R: original coordinates"""
+    N = S.shape[0]
+    A = np.zeros((N, N))
+    for i in range(N):
+        for j in range(N):
+            # check time ordering - A[i,j] is 1 if i is in the future of j
+            if R[i,0] > R[j,0]:
+                if S[i,j] < 0:
+                    A[i,j] = 1.
+    return A  
+    
 def transitive_completion(A_):
     """ Transitively complete adjacency matrix A"""
     A = A_[:,:]
@@ -127,50 +150,3 @@ def naive_spacelike_matrix(LP, dmax=None, k=None):
                 ds2[i,j] = sp_dist * sp_dist
                 ds2[j,i] = sp_dist * sp_dist
     return ds2 
-    
-def twolink_spacelike_matrix(LP, dmax=None):
-    """ 2-link spatial distance as described in Rideout2009a 
-    Arguments:
-    LP -- longest path matrix
-    dmax -- maximum spacelike distance to be returned
-    
-    Result should be an NxN symmetric matrix of negative longest paths
-    and positive 2-link spacelike separations
-    """
-    if dmax == None:
-        dmax = np.max(LP)
-    ds = LP + LP.transpose()
-    ds2 = ds * ds * -1
-    N = LP.shape[0]
-    for i in range(N):
-        for j in range(N):
-            if i > j: # spacelike distance is symmetric so ds[i,j]==ds[j,i], and ds[i,i]==0
-                if ds2[i,j] == 0: # then they are spacelike separated and need a new value here
-                    # find all 2-links in the future
-                    i2_future = np.where(LP[:,i]==1)[0]
-                    j2_future = np.where(LP[:,j]==1)[0]
-                    two_link_future = np.intersect1d(i2_future, j2_future)
-                    i_past = np.flatnonzero(LP[:,i])
-                    j_past = np.flatnonzero(LP[:,j])
-                    link_past = np.intersect1d(i_past, j_past)
-                    
-                    if len(two_link_future) > 0:
-                        # find all minimal LP to a point in their mutual past
-                        c = 0
-                        for w in two_link_future:
-                            sp_dist = dmax
-                            for z in link_past:
-                                w_z = LP[w,z]
-                                if w_z > 0:
-                                    sp_dist = min(sp_dist, w_z)
-                            c += sp_dist
-                        av_sp_dist = float(c) / len(two_link_future)  
-                    else:
-                        av_sp_dist = dmax   
-                    ds2[i,j] = av_sp_dist**2
-                    ds2[j,i] = av_sp_dist**2
-    return ds2 
-    
-if __name__ == "__main__":
-    print __doc__
-    
