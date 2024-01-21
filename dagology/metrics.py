@@ -76,14 +76,8 @@ def minkowski(x, y, c=1.):
 
     c - speed of light - default to 1."""
     assert len(x) == len(y), 'ERROR - vectors in minkowski have different lengths'
-    if np.array_equal(x, y):
-        return 0.
-    dt = x[0] - y[0]
-    dt2 = dt * dt
-    dx = np.array([x[i] - y[i] for i in range(1, len(x))])
-    dx2 = dx * dx
-    dx2sum = sum(dx2) * c * c
-    return dx2sum - dt2
+    x, y = np.asarray(x), np.asarray(y)
+    return (x[1:] - y[1:])**2 - (c*(x[0] - y[0]))**2 
 
 
 def minkowski_periodic(x, y, period, c=1.):

@@ -63,7 +63,10 @@ def causal_set_graph(R, p=1.0, periodic=None):
 
 
 def minkowski_interval_scatter(N, D, fix_ends=True):
-    """ Scatter N points in a D dimensional interval in Minkowski space
+    """ Scatter N points in a D dimensional interval in Minkowski space.
+    Start point has coordinates: (0, 0.5, 0.5, ..., 0.5).
+    End point has coordinates: (1, 0.5, 0.5, ..., 0.5).
+    -+++ metric is assumed.
 
     Parameters
     ----------
@@ -78,20 +81,18 @@ def minkowski_interval_scatter(N, D, fix_ends=True):
     Throw points into a unit box rejecting those outside the interval
     Repeat until N points have been reached
     Note that this is inefficient for large D"""
+    
     R = np.random.random((N, D))
-    a = np.zeros(D)
-    a[1:] = 0.5
-    b = np.zeros(D)
-    b[0] = 1.
-    b[1:] = 0.5
+    a, b = 0.5*np.ones(D), 0.5*np.ones(D)
+    a[0], b[0] = 0., 1.
+
     if fix_ends:
-        R[0] = a
-        R[1] = b
+        R[0], R[1] = a, b
         i_start = 2
     else:
         i_start = 0
     for i in range(i_start, N):
-        while (dag.minkowski(a, R[i, :]) > 0) or ((dag.minkowski(R[i, :], b) > 0)):
+        while dag.minkowski(a, R[i, :]) > 0 or dag.minkowski(R[i, :], b) > 0:
             R[i, :] = np.random.random(D)
     return R
 
