@@ -134,7 +134,7 @@ def de_sitter_param_estimate(chains, initial_guess=None, debug=False):
         D = dag.mmd_estimate(chains[1], 2, chains[0])
         d_guess = D - 1.
         if debug:
-            print 'd_guess = %s' % d_guess
+            print('d_guess = %s' % d_guess)
         initial_guess = [20., d_guess, 0.]
 
     min_opt = optimize.minimize(f, x0=initial_guess,
@@ -142,7 +142,7 @@ def de_sitter_param_estimate(chains, initial_guess=None, debug=False):
                                 bounds=((0., 100.,), (0.01, 5.,), (-0.2, 0.2)))
 
     if debug:
-        print min_opt
+        print(min_opt)
     T, d, K = min_opt['x']
 
     # check answer is reasonable
@@ -151,14 +151,14 @@ def de_sitter_param_estimate(chains, initial_guess=None, debug=False):
         diff_2 = (C_2(T, d, K) - chains[1]) / chains[1]
         diff_3 = (C_3(T, d, K) - chains[2]) / chains[2]
         if diff_1 > 0.1:
-            print 'C_1 out by %s' % diff_1
+            print('C_1 out by %s' % diff_1)
         if diff_2 > 0.1:
-            print 'C_2 out by %s' % diff_2
+            print('C_2 out by %s' % diff_2)
         if diff_3 > 0.1:
-            print 'C_3 out by %s' % diff_3
+            print('C_3 out by %s' % diff_3)
 
     return T, d, K
 
 
 if __name__ == "__main__":
-    print __doc__
+    print(__doc__)

@@ -1,2 +1,2 @@
-from matrix_utils import *
-from mds import *
+from .matrix_utils import *
+from .mds import *

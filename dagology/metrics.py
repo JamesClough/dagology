@@ -124,4 +124,4 @@ def de_sitter(x, y):
     return (dx2 - dt2)
 
 if __name__ == "__main__":
-    print __doc__
+    print(__doc__)
