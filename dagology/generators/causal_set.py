@@ -45,20 +45,24 @@ def causal_set_graph(R, p=1.0, periodic=None):
     the Minkowski metric.
     """
     G = nx.DiGraph()
-    N, D = R.shape
-    edgelist = []
+    N = R.shape[0]
+    
+    # Choose metric computation method based on the periodicity
+    metric = (lambda x, y: dag.minkowski_periodic(x, y, periodic)) if periodic else dag.minkowski
+
+    # Sort the array along the time coordinate
+    R = R[np.argsort(R[:, 0])]
+
+    # Add nodes to DAG
     for i in range(N):
         G.add_node(i, position=tuple(R[i]))
-        for j in range(N):
-            if R[i, 0] < R[j, 0]:
-                if p == 1. or p > np.random.random():
-                    if periodic:
-                        if dag.minkowski_periodic(R[i], R[j], periodic) < 0:
-                            edgelist.append([i,j])
-                    else:
-                        if dag.minkowski(R[i], R[j]) < 0:
-                            edgelist.append([i,j])
-    G.add_edges_from(edgelist)
+
+    # Loop over pairs i,j such that i precedes j, i.e. R[i, 0] < R[j, 0]
+    # Add directed edge with probability p if they are time-like separated
+    for i in range(N):
+        for j in range(i+1, N):
+            if (p == 1. or p > np.random.random()) and metric(R[i], R[j]) < 0:
+                G.add_edge(i, j)
     return G
 
 
