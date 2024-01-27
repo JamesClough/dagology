@@ -24,18 +24,15 @@ __all__ = ['causal_set_graph',
            'minkowski_interval',
            'de_sitter_interval']
 
-
-def causal_set_graph(R, p=1.0, periodic=None, sorted=True):
+def causal_set_graph(R, p=1.0, sorted=True):
     """
     Create a Causal Set DAG from a set of coordinates, an NxD numpy array
-
 
     Parameters
     ----------
 
     R - coordinates of points
     p - probability with which allowed edges appear
-    periodic - list - the periodic size of each dimension
     sorted - boolean - set to True if i < j implies R[i, 0] < R[j, 0]
 
     Notes
@@ -48,24 +45,22 @@ def causal_set_graph(R, p=1.0, periodic=None, sorted=True):
     G = nx.DiGraph()
     N = R.shape[0]
     
-    # Choose metric computation method based on the periodicity
-    metric = (lambda x, y: dag.minkowski_periodic(x, y, periodic)) if periodic else dag.minkowski
-    
-    if sorted:
-        is_timelike = lambda x, y: metric(x, y) < 0
-    else:
-        is_timelike = lambda x, y: metric(x, y) < 0 and x[0] < y[0]
-
     # Add nodes to DAG
     for i in range(N):
         G.add_node(i, position=tuple(R[i]))
 
     # Loop over pairs of nodes
-    for i in range(N):
-        for j in range(i+1 if sorted else 0, N):
-            # Add directed edge with probability p if they are time-like separated
-            if (p == 1. or p > np.random.random()) and is_timelike(R[i], R[j]):
-                G.add_edge(i, j)
+    # Add directed edge with probability p if they are time-like separated
+    edges = []
+    for i in range(N-1):
+        j_start = i + 1 if sorted else 0
+        i_nbrs = np.logical_and(dag.minkowski(R[i], R[j_start:]) < 0, R[i, 0] < R[j_start:, 0])
+
+        if p < 1:
+            i_nbrs[np.random.rand(N - j_start) > p] = False
+
+        edges.extend((i, j) for j in np.where(i_nbrs)[0] + j_start)
+    G.add_edges_from(edges)
     return G
 
 

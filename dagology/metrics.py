@@ -73,11 +73,15 @@ def hyperbolic(x, y, a=1.):
 
 def minkowski(x, y, c=1.):
     """Calculate Minkowski separation between x and y using -++...+ convention
-
-    c - speed of light - default to 1."""
-    assert len(x) == len(y), 'ERROR - vectors in minkowski have different lengths'
+    c - speed of light - default to 1.
+    y is allowed to be an array of size NxD
+    The output is a 1D array of length N
+    """
     x, y = np.asarray(x), np.asarray(y)
-    return (x[1:] - y[1:])**2 - (c*(x[0] - y[0]))**2 
+    if y.ndim == 1:
+        y = y.reshape(1, -1)
+    dx = y[:, 1:] - x[1:]
+    return (dx**2).sum(axis=1) - (c*(y[:, 0] - x[0]))**2 
 
 
 def minkowski_periodic(x, y, period, c=1.):
