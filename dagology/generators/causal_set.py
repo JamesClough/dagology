@@ -13,7 +13,7 @@ causal_set_graph(R, p)
 #    All rights reserved.
 #    BSD license.
 
-__author__ = "\n".join(["James Clough (james.clough91@gmail.com)"])
+__author__ = "\n".join(["James Clough (james.clough91@gmail.com)", "Nicolas Kozak (nicolas.kozak5@gmail.com)"])
 
 import networkx as nx
 import numpy as np

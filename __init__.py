@@ -16,15 +16,9 @@ Lorentzian Multidimensional Scaling
 http://arxiv.org/pdf/1602.03103.pdf
 """
 
-#
-#    Copyright (C) 2016
-#    James Clough <james.clough91@gmail.com>
-#    All rights reserved.
-#    MIT Licence
-
 import sys
-if sys.version_info[:2] < (2, 6):
-    m = "Python version 2.6 or later is required (%d.%d detected)."
+if sys.version_info[:2] < (3, 6):
+    m = "Python version 3.6 or later is required (%d.%d detected)."
     raise ImportError(m % sys.version_info[:2])
 del sys
 
