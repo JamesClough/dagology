@@ -25,7 +25,7 @@ __all__ = ['causal_set_graph',
            'de_sitter_interval']
 
 
-def causal_set_graph(R, p=1.0, periodic=None):
+def causal_set_graph(R, p=1.0, periodic=None, sorted=True):
     """
     Create a Causal Set DAG from a set of coordinates, an NxD numpy array
 
@@ -36,6 +36,7 @@ def causal_set_graph(R, p=1.0, periodic=None):
     R - coordinates of points
     p - probability with which allowed edges appear
     periodic - list - the periodic size of each dimension
+    sorted - boolean - set to True if i < j implies R[i, 0] < R[j, 0]
 
     Notes
     -----
@@ -49,19 +50,21 @@ def causal_set_graph(R, p=1.0, periodic=None):
     
     # Choose metric computation method based on the periodicity
     metric = (lambda x, y: dag.minkowski_periodic(x, y, periodic)) if periodic else dag.minkowski
-
-    # Sort the array along the time coordinate
-    R = R[np.argsort(R[:, 0])]
+    
+    if sorted:
+        is_timelike = lambda x, y: metric(x, y) < 0
+    else:
+        is_timelike = lambda x, y: metric(x, y) < 0 and x[0] < y[0]
 
     # Add nodes to DAG
     for i in range(N):
         G.add_node(i, position=tuple(R[i]))
 
-    # Loop over pairs i,j such that i precedes j, i.e. R[i, 0] < R[j, 0]
-    # Add directed edge with probability p if they are time-like separated
+    # Loop over pairs of nodes
     for i in range(N):
-        for j in range(i+1, N):
-            if (p == 1. or p > np.random.random()) and metric(R[i], R[j]) < 0:
+        for j in range(i+1 if sorted else 0, N):
+            # Add directed edge with probability p if they are time-like separated
+            if (p == 1. or p > np.random.random()) and is_timelike(R[i], R[j]):
                 G.add_edge(i, j)
     return G
 
@@ -110,7 +113,7 @@ def minkowski_interval_map(N, D, fix_ends=True):
     assert False, 'ERROR - minkowski_interval_map not implemented yet'
 
 
-def minkowski_interval(N, D, fix_ends=True, method='scatter'):
+def minkowski_interval(N, D, fix_ends=True, method='scatter', sorted=True):
     """ Scatter N points in a D dimensional interval in Minkowski space
 
     Available methods are:
@@ -120,13 +123,21 @@ def minkowski_interval(N, D, fix_ends=True, method='scatter'):
 
     map -- map D unit cube to the relevant interval respecting volume elements
            not yet implemented
+           
+    Parameters
+    ----------
+    sorted - boolean - If true, sorts the array's zeroth component in ascending order
     """
-    if method == 'scatter':
-        return minkowski_interval_scatter(N, D, fix_ends)
-    elif method == 'map':
-        return minkowski_interval_map(N, D, fix_ends)
-    else:
-        assert False, 'Invalid method %s given to minkowski_interval' % method
+    methods = {'scatter': minkowski_interval_scatter,
+               'map': minkowski_interval_map}
+    
+    if method not in methods:
+        raise ValueError(f"Invalid method {method} given to minkowski_interval")
+
+    R = methods[method](N, D, fix_ends)
+    if sorted:
+        R[:, 0].sort() # Sort time component only
+    return R
 
 
 def sphere_surface_cartesian(N, D):
