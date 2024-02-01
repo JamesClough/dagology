@@ -24,7 +24,7 @@ __all__ = ['causal_set_graph',
            'minkowski_interval',
            'de_sitter_interval']
 
-def causal_set_graph(R, p=1.0, sorted=True):
+def causal_set_graph(R, p=1.0, sorted=True, weighted=False):
     """
     Create a Causal Set DAG from a set of coordinates, an NxD numpy array
 
@@ -54,13 +54,21 @@ def causal_set_graph(R, p=1.0, sorted=True):
     edges = []
     for i in range(N-1):
         j_start = i + 1 if sorted else 0
-        i_nbrs = np.logical_and(dag.minkowski(R[i], R[j_start:]) < 0, R[i, 0] < R[j_start:, 0])
+        i_weights = dag.minkowski(R[i], R[j_start:]
+        i_nbrs = np.logical_and(i_weights) < 0, R[i, 0] < R[j_start:, 0])
 
         if p < 1:
             i_nbrs[np.random.rand(N - j_start) > p] = False
-
-        edges.extend((i, j) for j in np.where(i_nbrs)[0] + j_start)
-    G.add_edges_from(edges)
+            
+        if weighted:
+            edges.extend((i, j, w) for j, w in zip(np.where(i_nbrs)[0] + j_start, i_weights))
+        else:
+            edges.extend((i, j) for j in np.where(i_nbrs)[0] + j_start)
+            
+    if weighted:
+        G.add_weighted_edges_from(edges)
+    else:
+        G.add_edges_from(edges)
     return G
 
 
