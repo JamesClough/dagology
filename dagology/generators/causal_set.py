@@ -54,8 +54,8 @@ def causal_set_graph(R, p=1.0, sorted=True, weighted=False):
     edges = []
     for i in range(N-1):
         j_start = i + 1 if sorted else 0
-        i_weights = dag.minkowski(R[i], R[j_start:]
-        i_nbrs = np.logical_and(i_weights) < 0, R[i, 0] < R[j_start:, 0])
+        i_weights = dag.minkowski(R[i], R[j_start:])
+        i_nbrs = np.logical_and(i_weights < 0, R[i, 0] < R[j_start:, 0])
 
         if p < 1:
             i_nbrs[np.random.rand(N - j_start) > p] = False
