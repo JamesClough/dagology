@@ -11,7 +11,7 @@ scipy.spatial.distance.pdist()
 #    All rights reserved.
 #    BSD license.
 
-__author__ = "\n".join(["James Clough (james.clough91@gmail.com)"])
+__author__ = "\n".join(["James Clough (james.clough91@gmail.com)", "Nicolas Kozak (nicolas.kozak5@gmail.com)"])
 
 import numpy as np
 
@@ -126,8 +126,11 @@ def de_sitter(x, y):
 # Lp norm
 ##########################################################################
 
-def lp(x, y, p):
-    ...
+def lp_distance(x, y, p):
+    x, y = np.asarray(x), np.asarray(y)
+    if y.ndim == 1:
+        y = y.reshape(1, -1)
+    return (abs(y - x)**(p)).sum(axis=1)
     
 if __name__ == "__main__":
     print(__doc__)

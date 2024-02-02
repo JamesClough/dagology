@@ -1,11 +1,5 @@
 """
 Models for causal set graphs.
-
-Available methods:
-
-minkowski_interval(N, D)
-de_sitter_interval(N, D, eta_0, eta_1)
-causal_set_graph(R, p)
 """
 
 #    Copyright (C) 2016 by
@@ -19,57 +13,18 @@ import networkx as nx
 import numpy as np
 
 import dagology as dag
+from .abstract_dag import AbstractDAG
 
-__all__ = ['causal_set_graph',
+__all__ = ['CausalSetGraph',
            'minkowski_interval',
            'de_sitter_interval']
 
-def causal_set_graph(R, p=1.0, sorted=True, weighted=False):
-    """
-    Create a Causal Set DAG from a set of coordinates, an NxD numpy array
+class CausalSetGraph(AbstractDAG):
+    def _is_neighbor(self, x, y, weights):
+        return np.logical_and(weights < 0, x[0] < y[:, 0])
 
-    Parameters
-    ----------
-
-    R - coordinates of points
-    p - probability with which allowed edges appear
-    sorted - boolean - set to True if i < j implies R[i, 0] < R[j, 0]
-
-    Notes
-    -----
-
-    We are assuming a conformal spacetime - ie. lightcones are straight lines
-    and therefore can calculate whether two points should be connected using
-    the Minkowski metric.
-    """
-    G = nx.DiGraph()
-    N = R.shape[0]
-    
-    # Add nodes to DAG
-    for i in range(N):
-        G.add_node(i, position=tuple(R[i]))
-
-    # Loop over pairs of nodes
-    # Add directed edge with probability p if they are time-like separated
-    edges = []
-    for i in range(N-1):
-        j_start = i + 1 if sorted else 0
-        i_weights = dag.minkowski(R[i], R[j_start:])
-        i_nbrs = np.logical_and(i_weights < 0, R[i, 0] < R[j_start:, 0])
-
-        if p < 1:
-            i_nbrs[np.random.rand(N - j_start) > p] = False
-            
-        if weighted:
-            edges.extend((i, j, w) for j, w in zip(np.where(i_nbrs)[0] + j_start, i_weights))
-        else:
-            edges.extend((i, j) for j in np.where(i_nbrs)[0] + j_start)
-            
-    if weighted:
-        G.add_weighted_edges_from(edges)
-    else:
-        G.add_edges_from(edges)
-    return G
+    def _calculate_weights(self, x, y):
+        return dag.minkowski(x, y)
 
 
 def minkowski_interval_scatter(N, D, fix_ends=True):
@@ -97,13 +52,10 @@ def minkowski_interval_scatter(N, D, fix_ends=True):
     a[0], b[0] = 0., 1.
 
     if fix_ends:
-        R[0], R[1] = a, b
-        i_start = 2
-    else:
-        i_start = 0
-    for i in range(i_start, N):
-        while dag.minkowski(a, R[i, :]) > 0 or dag.minkowski(R[i, :], b) > 0:
-            R[i, :] = np.random.random(D)
+        R[0], R[N-1] = a, b
+    for i in range(1, N-1) if fix_ends else range(N):
+        while dag.minkowski(a, R[i]) > 0 or dag.minkowski(R[i], b) > 0:
+            R[i] = np.random.random(D)
     return R
 
 
