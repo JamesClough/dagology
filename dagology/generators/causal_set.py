@@ -91,7 +91,8 @@ def minkowski_interval(N, D, fix_ends=True, method='scatter', sorted=True):
 
     R = methods[method](N, D, fix_ends)
     if sorted:
-        R[:, 0].sort() # Sort time component only
+        # Sort by increasing time component
+        R = R[np.argsort(R[:, 0])]
     return R
 
 
