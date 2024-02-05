@@ -21,7 +21,7 @@ __all__ = ['CausalSetGraph',
 
 class CausalSetGraph(AbstractDAG):
     def _is_neighbor(self, x, y, weights):
-        return np.logical_and(weights < 0, x[0] < y[:, 0])
+        return np.logical_and(weights > 0, x[0] < y[:, 0])
 
     def _calculate_weights(self, x, y):
         return dag.minkowski(x, y)
@@ -31,7 +31,7 @@ def minkowski_interval_scatter(N, D, fix_ends=True):
     """ Scatter N points in a D dimensional interval in Minkowski space.
     Start point has coordinates: (0, 0.5, 0.5, ..., 0.5).
     End point has coordinates: (1, 0.5, 0.5, ..., 0.5).
-    -+++ metric is assumed.
+    +--- metric is assumed.
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ def minkowski_interval_scatter(N, D, fix_ends=True):
     if fix_ends:
         R[0], R[N-1] = a, b
     for i in range(1, N-1) if fix_ends else range(N):
-        while dag.minkowski(a, R[i]) > 0 or dag.minkowski(R[i], b) > 0:
+        while dag.minkowski(a, R[i]) < 0 or dag.minkowski(R[i], b) < 0:
             R[i] = np.random.random(D)
     return R
 
